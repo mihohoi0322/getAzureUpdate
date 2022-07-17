@@ -1,16 +1,22 @@
-# これはサンプルの Python スクリプトです。
+import urllib.parse
+from bs4 import BeautifulSoup
+import requests
+import feedparser
+import pprint
 
-# Shift+F10 を押して実行するか、ご自身のコードに置き換えてください。
-# Shift を2回押す を押すと、クラス/ファイル/ツールウィンドウ/アクション/設定を検索します。
+category = {"category": "containers"}
+html = "https://azure.microsoft.com/ja-jp/updates/feed" + "?" + urllib.parse.urlencode(category)
+artuckes = feedparser.parse(html)
 
 
-def print_hi(name):
-    # スクリプトをデバッグするには以下のコード行でブレークポイントを使用してください。
-    print(f'Hi, {name}')  # Ctrl+F8を押すとブレークポイントを切り替えます。
+for rss in artuckes.entries:
+    dic = {
+        "title": rss.title,
+        "link": rss.link,
+        "summary": rss.summary,
+        "year": rss.published_parsed.tm_year,
+        "month": rss.published_parsed.tm_mon,
+        "day": rss.published_parsed.tm_mday
+    }
+    print(dic)
 
-
-# ガター内の緑色のボタンを押すとスクリプトを実行します。
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# PyCharm のヘルプは https://www.jetbrains.com/help/pycharm/ を参照してください
