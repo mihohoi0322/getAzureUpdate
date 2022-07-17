@@ -1,7 +1,7 @@
 import urllib.parse
 import feedparser
 
-
+# TODO: list a category
 def getrss(category):
     categories = {"category": category}
     html = "https://azure.microsoft.com/ja-jp/updates/feed" + "?" + urllib.parse.urlencode(categories)
@@ -19,6 +19,9 @@ def getrss(category):
         }
         rss_list.append(dic)
     return rss_list
+
+# TODO: output a csv file
+
 
 print(getrss("containers"))
 print(type(getrss("containers")))
