@@ -1,10 +1,8 @@
 import urllib.parse
-from bs4 import BeautifulSoup
-import requests
 import feedparser
 
 
-def getRSS(category):
+def getrss(category):
     categories = {"category": category}
     html = "https://azure.microsoft.com/ja-jp/updates/feed" + "?" + urllib.parse.urlencode(categories)
     lists = feedparser.parse(html)
@@ -20,9 +18,9 @@ def getRSS(category):
             "day": rss.published_parsed.tm_mday
         }
         rss_list.append(dic)
-        print(rss_list)
     return rss_list
 
-print(getRSS("container"))
+print(getrss("containers"))
+print(type(getrss("containers")))
 
 
