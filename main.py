@@ -35,3 +35,6 @@ rss_list = getrss("containers")
 print(rss_list)
 print(type(rss_list))
 print(pd.json_normalize(rss_list))
+rss_df = pd.json_normalize(rss_list)
+
+rss_df.to_csv('test.csv', index=False)
