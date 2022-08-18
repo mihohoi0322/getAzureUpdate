@@ -23,9 +23,7 @@ def getrss(category):
         rss_list.append(dic)
 
     return rss_list
-# TODO: output a csv file use pandas
 
-# TODO: filter to year & month
 def filterMonth(month):
     list(filter(lambda x: rss_list.sort(month = 8)))
     return
@@ -33,8 +31,10 @@ def filterMonth(month):
 
 rss_list = getrss("containers")
 print(rss_list)
-print(type(rss_list))
-print(pd.json_normalize(rss_list))
-rss_df = pd.json_normalize(rss_list)
 
-rss_df.to_csv('test.csv', index=False)
+df = pd.json_normalize(rss_list)
+
+print(df[df['month'] == 8])
+df = df[(df['month'] == 8) & (df['year'] == 2022)]
+
+df.to_csv('test.csv', index=False)
