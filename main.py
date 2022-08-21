@@ -2,10 +2,22 @@ import urllib.parse
 import feedparser
 import pandas as pd
 
-# TODO: list a category
-def getrss(category):
+urls = ""
+def getrss(month, category, *args):
+    global urls
     categories = {"category": category}
-    html = "https://azure.microsoft.com/ja-jp/updates/feed" + "?" + urllib.parse.urlencode(categories)
+
+    # args のカウントして URL を生成する
+    count = len(args)
+    for key in args:
+        if not urls:
+            urls = "," + key
+        else:
+            urls = urls + "," + key
+
+    #html = "https://azure.microsoft.com/ja-jp/updates/feed" + "?" + urllib.parse.urlencode(categories)
+    html = "https://azure.microsoft.com/ja-jp/updates/feed" + "?" + urllib.parse.urlencode(categories) + urls
+    print(html)
     lists = feedparser.parse(html)
 
     file = open("test.csv", "w")
@@ -18,23 +30,20 @@ def getrss(category):
             "summary": rss.summary,
             "year": rss.published_parsed.tm_year,
             "month": rss.published_parsed.tm_mon,
-            "day": rss.published_parsed.tm_mday
+            "day": rss.published_parsed.tm_mday,
         }
         rss_list.append(dic)
 
-    return rss_list
-
-def filterMonth(month):
-    list(filter(lambda x: rss_list.sort(month = 8)))
+    filterMonth(month, rss_list)
     return
 
+def filterMonth(month, rss_list):
+    df = pd.json_normalize(rss_list)
+    print(df[df['month'] == month])
+    df = df[(df['month'] == month) & (df['year'] == 2022)]
 
-rss_list = getrss("containers")
-print(rss_list)
 
-df = pd.json_normalize(rss_list)
+    df.to_csv('test.csv', index=False)
+    return
 
-print(df[df['month'] == 8])
-df = df[(df['month'] == 8) & (df['year'] == 2022)]
-
-df.to_csv('test.csv', index=False)
+rss_list = getrss(8, "databases", "compute", "identity")
