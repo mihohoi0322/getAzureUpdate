@@ -7,19 +7,16 @@ def getrss(month, category, *args):
     global urls
     categories = {"category": category}
 
-    # args のカウントして URL を生成する
-    count = len(args)
     for key in args:
         if not urls:
             urls = "," + key
         else:
             urls = urls + "," + key
 
-    #html = "https://azure.microsoft.com/ja-jp/updates/feed" + "?" + urllib.parse.urlencode(categories)
     html = "https://azure.microsoft.com/ja-jp/updates/feed" + "?" + urllib.parse.urlencode(categories) + urls
     print(html)
     lists = feedparser.parse(html)
-
+    print(lists.entries)
     file = open("test.csv", "w")
 
     rss_list = []
@@ -39,9 +36,7 @@ def getrss(month, category, *args):
 
 def filterMonth(month, rss_list):
     df = pd.json_normalize(rss_list)
-    print(df[df['month'] == month])
     df = df[(df['month'] == month) & (df['year'] == 2022)]
-
 
     df.to_csv('test.csv', index=False)
     return
