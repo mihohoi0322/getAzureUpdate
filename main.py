@@ -16,8 +16,8 @@ def getrss(month, category, *args):
     html = "https://azure.microsoft.com/ja-jp/updates/feed" + "?" + urllib.parse.urlencode(categories) + urls
     print(html)
     lists = feedparser.parse(html)
-    print(lists.entries)
-    file = open("test.csv", "w")
+    #print(lists.entries)
+    #file = open("test.csv", "w")
 
     rss_list = []
     for rss in lists.entries:
@@ -36,9 +36,9 @@ def getrss(month, category, *args):
 
 def filterMonth(month, rss_list):
     df = pd.json_normalize(rss_list)
-    df = df[(df['month'] == month) & (df['year'] == 2022)]
+    df = df[(df['month'] == month) & (df['year'] == 2023)]
 
-    df.to_csv('test.csv', index=False)
+    df.to_csv('update_02.csv', index=False)
     return
 
-rss_list = getrss(8, "databases", "compute", "identity")
+rss_list = getrss(2, "databases", "compute", "featured")
