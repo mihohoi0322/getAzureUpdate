@@ -32,13 +32,13 @@ def getrss(month, category, *args):
         rss_list.append(dic)
 
     filterMonth(month, rss_list)
-    return
+    return rss_list
 
 def filterMonth(month, rss_list):
     df = pd.json_normalize(rss_list)
     df = df[(df['month'] == month) & (df['year'] == 2023)]
 
-    df.to_csv('update_02.csv', index=False)
+    df.to_csv('updae02-2.csv', index=False)
     return
 
 rss_list = getrss(2, "databases", "compute", "featured")
