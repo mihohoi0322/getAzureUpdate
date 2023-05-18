@@ -1,44 +1,67 @@
-import urllib.parse
 import feedparser
-import pandas as pd
+import csv
+from datetime import datetime
 
-urls = ""
-def getrss(month, category, *args):
-    global urls
-    categories = {"category": category}
+# Azure updates RSS feed URL
+url = "https://azure.microsoft.com/en/updates/feed"
 
-    for key in args:
-        if not urls:
-            urls = "," + key
-        else:
-            urls = urls + "," + key
+# Parse the feed
+feed = feedparser.parse(url)
 
-    html = "https://azure.microsoft.com/ja-jp/updates/feed" + "?" + urllib.parse.urlencode(categories) + urls
-    print(html)
-    lists = feedparser.parse(html)
-    #print(lists.entries)
-    #file = open("test.csv", "w")
+# Initialize a list to store entries
+entries = []
 
-    rss_list = []
-    for rss in lists.entries:
-        dic = {
-            "title": rss.title,
-            "link": rss.link,
-            "summary": rss.summary,
-            "year": rss.published_parsed.tm_year,
-            "month": rss.published_parsed.tm_mon,
-            "day": rss.published_parsed.tm_mday,
-        }
-        rss_list.append(dic)
+# Get the current month and the previous month
+current_month = datetime.now().month
+previous_month = current_month - 1 if current_month != 1 else 12
 
-    filterMonth(month, rss_list)
-    return rss_list
+# Loop through the feed entries
+for entry in feed.entries:
+    # Convert published date to yyyymmdd format
+    published_date = datetime.strptime(entry.published, "%a, %d %b %Y %H:%M:%S %z")
+    formatted_published_date = published_date.strftime("%Y%m%d")
 
-def filterMonth(month, rss_list):
-    df = pd.json_normalize(rss_list)
-    df = df[(df['month'] == month) & (df['year'] == 2023)]
+    # Skip the entry if the published month is not the current month or the previous month
+    if published_date.month not in [current_month, previous_month]:
+        continue
 
-    df.to_csv('updae02-2.csv', index=False)
-    return
+    # Determine the status based on the title
+    title_lower = entry.title.lower()
+    if title_lower.startswith('preview'):
+        status = 'Preview'
+    elif title_lower.startswith('public preview'):
+        status = 'Public Preview'
+    elif title_lower.startswith('generally available') or title_lower.startswith('general availability'):
+        status = 'GA'
+    elif title_lower.startswith('private preview'):
+        status = 'Private Preview'
+    elif title_lower.startswith('ga'):
+        status = 'GA'
+    else:
+        status = 'N/A'
 
-rss_list = getrss(2, "databases", "compute", "featured")
+    # Check if status is N/A and 'retired' is in the summary, then set status to 'Retirements'
+    summary_lower = entry.summary.lower()
+    if status == 'N/A' and 'retired' in summary_lower:
+        status = 'Retirements'
+
+    entries.append({
+        'Status': status,
+        'Title': entry.title,
+        'Link': entry.link,
+        'Published': formatted_published_date,
+        'Summary': entry.summary,
+        'Content': entry.content[0].value if 'content' in entry else 'N/A'
+    })
+
+# Define the CSV file name based on the current date
+csv_file_name = f"azure_updates_{datetime.now().strftime('%Y%m%d')}.csv"
+
+# Write the entries to the CSV file
+with open(csv_file_name, 'w', newline='', encoding='utf-8') as csv_file:
+    writer = csv.DictWriter(csv_file, fieldnames=entries[0].keys())
+    writer.writeheader()
+    writer.writerows(entries)
+
+print(f"This month and last month's updates are written to {csv_file_name}")
+print(f"Data written to {csv_file_name}")
